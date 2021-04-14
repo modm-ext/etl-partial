@@ -51,6 +51,7 @@ SOFTWARE.
   #include <utility>
   #include <iterator>
   #include <functional>
+  #include <numeric>
 #endif
 
 #include "private/minmax_push.h"
@@ -2578,6 +2579,150 @@ namespace etl
     std::stable_sort(first, last);
   }
 #endif
+
+#if ETL_NOT_USING_STL
+  //***************************************************************************
+  /// Accumulates values.
+  ///\ingroup algorithm
+  //***************************************************************************
+  template <typename TIterator, typename T>
+  ETL_CONSTEXPR14 T accumulate(TIterator first, TIterator last, T sum)
+  {
+    while (first != last)
+    {
+      sum = etl::move(sum) + *first++;
+    }
+
+    return sum;
+  }
+
+  //***************************************************************************
+  /// Accumulates values.
+  ///\ingroup algorithm
+  //***************************************************************************
+  template <typename TIterator, typename T, typename TBinaryOperation>
+  ETL_CONSTEXPR14 T accumulate(TIterator first, TIterator last, T sum, TBinaryOperation operation)
+  {
+    while (first != last)
+    {
+      sum = operation(etl::move(sum), *first++);
+    }
+
+    return sum;
+  }
+#else
+  //***************************************************************************
+  /// Accumulates values.
+  ///\ingroup algorithm
+  //***************************************************************************
+  template<typename TIterator, typename T>
+  ETL_CONSTEXPR14 T accumulate(TIterator first, TIterator last, T sum)
+  {
+    return std::accumulate(first, last, sum);
+  }
+
+  //***************************************************************************
+  /// Accumulates values.
+  ///\ingroup algorithm
+  //***************************************************************************
+  template<typename TIterator, typename T, typename TBinaryOperation>
+  ETL_CONSTEXPR14 T accumulate(TIterator first, TIterator last, T sum, TBinaryOperation operation)
+  {
+    return std::accumulate(first, last, sum, operation);
+  }
+#endif
+
+  //***************************************************************************
+  /// Clamp values.
+  ///\ingroup algorithm
+  //***************************************************************************
+  template<typename T, typename TCompare>
+  ETL_CONSTEXPR const T& clamp(const T& value, const T& low, const T& high, TCompare compare)
+  {
+    return compare(value, low) ? low : compare(high, value) ? high : value;
+  }
+
+  template <typename T>
+  ETL_CONSTEXPR const T& clamp(const T& value, const T& low, const T& high )
+  {
+    return clamp(value, low, high, etl::less<T>());
+  }
+
+  #if ETL_NOT_USING_STL
+    //***************************************************************************
+    /// Remove
+    ///\ingroup algorithm
+    //***************************************************************************
+    template <typename TIterator, typename T>
+    TIterator remove(TIterator first, TIterator last, const T& value)
+    {
+      first = etl::find(first, last, value);
+
+      if (first != last)
+      {
+        TIterator itr = first;
+
+        while (itr != last)
+        {
+          if (!(*itr == value))
+          {
+            *first++ = etl::move(*itr);
+          }
+
+          ++itr;
+        }
+      }
+
+      return first;
+    }
+
+    //***************************************************************************
+    /// Remove If
+    ///\ingroup algorithm
+    //***************************************************************************
+    template <typename TIterator, typename TUnaryPredicate>
+    TIterator remove_if(TIterator first, TIterator last, TUnaryPredicate predicate)
+    {
+      first = etl::find_if(first, last, predicate);
+
+      if (first != last)
+      {
+        TIterator itr = first;
+
+        while (itr != last)
+        {
+          if (!predicate(*itr))
+          {
+            *first++ = etl::move(*itr);
+          }
+
+          ++itr;
+        }
+      }
+
+      return first;
+    }
+  #else
+    //***************************************************************************
+    /// Remove
+    ///\ingroup algorithm
+    //***************************************************************************
+    template <typename TIterator, typename T>
+    TIterator remove(TIterator first, TIterator last, const T& value)
+    {
+      return std::remove(first, last, value);
+    }
+
+    //***************************************************************************
+    /// Remove If
+    ///\ingroup algorithm
+    //***************************************************************************
+    template <typename TIterator, typename TUnaryPredicate>
+    TIterator remove_if(TIterator first, TIterator last, TUnaryPredicate predicate)
+    {
+      return std::remove_if(first, last, predicate);;
+    }
+  #endif
 }
 
 //*****************************************************************************
