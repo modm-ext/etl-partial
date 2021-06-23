@@ -1088,6 +1088,7 @@ namespace etl
     {
       if (this != &other)
       {
+        this->clear();
         this->push(other.begin(), other.end());
       }
 
@@ -1119,6 +1120,8 @@ namespace etl
     {
       if (this != &other)
       {
+        this->clear();
+
         for (typename etl::icircular_buffer<T>::const_iterator itr = other.begin(); itr != other.end(); ++itr)
         {
           this->push(etl::move(*itr));
@@ -1203,8 +1206,10 @@ namespace etl
     //*************************************************************************
     circular_buffer_ext& operator =(const circular_buffer_ext& other)
     {
+
       if (this != &other)
       {
+        this->clear();
         this->push(other.begin(), other.end());
       }
 
@@ -1236,6 +1241,8 @@ namespace etl
     {
       if (this != &other)
       {
+        this->clear();
+
         for (typename etl::icircular_buffer<T>::iterator itr = other.begin(); itr != other.end(); ++itr)
         {
           this->push(etl::move(*itr));
