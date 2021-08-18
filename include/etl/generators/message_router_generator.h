@@ -77,6 +77,7 @@ cog.outl("//********************************************************************
 #include "nullptr.h"
 #include "placement_new.h"
 #include "successor.h"
+#include "type_traits.h"
 
 namespace etl
 {
@@ -307,6 +308,128 @@ namespace etl
     destination.receive(message);
   }
 
+//*************************************************************************************************
+// For C++17 and above.
+//*************************************************************************************************
+#if ETL_CPP17_SUPPORTED && !defined(ETL_MESSAGE_ROUTER_FORCE_CPP03)
+  //***************************************************************************
+  // The definition for all message types.
+  //***************************************************************************
+  template <typename TDerived, typename... TMessageTypes>
+  class message_router : public imessage_router
+  {
+  public:
+
+    typedef etl::message_packet<TMessageTypes...> message_packet;
+
+    //**********************************************
+    message_router(etl::message_router_id_t id_)
+      : imessage_router(id_)
+    {
+      ETL_ASSERT(id_ <= etl::imessage_router::MAX_MESSAGE_ROUTER, ETL_ERROR(etl::message_router_illegal_id));
+    }
+
+    //**********************************************
+    message_router(etl::message_router_id_t id_, etl::imessage_router& successor_)
+      : imessage_router(id_, successor_)
+    {
+      ETL_ASSERT(id_ <= etl::imessage_router::MAX_MESSAGE_ROUTER, ETL_ERROR(etl::message_router_illegal_id));
+    }
+
+    //**********************************************
+    using etl::imessage_router::receive;
+
+    void receive(const etl::imessage& msg) ETL_OVERRIDE
+    {
+      const bool was_handled = (receive_message_type<TMessageTypes>(msg) || ...);
+
+      if (!was_handled)
+      {
+        if (has_successor())
+        {
+          get_successor().receive(msg);
+        }
+        else
+        {
+          static_cast<TDerived*>(this)->on_receive_unknown(msg);
+        }
+      }
+    }
+
+    template <typename TMessage, typename etl::enable_if<etl::is_base_of<imessage, TMessage>::value, int>::type = 0>
+    void receive(const TMessage& msg)
+    {
+      if constexpr (etl::is_one_of<TMessage, TMessageTypes...>::value)
+      {
+        static_cast<TDerived*>(this)->on_receive(static_cast<const TMessage&>(msg));
+      }
+      else
+      {
+        static_cast<TDerived*>(this)->on_receive_unknown(msg);
+      }
+    }
+
+    //**********************************************
+    using imessage_router::accepts;
+
+    bool accepts(etl::message_id_t id) const ETL_OVERRIDE
+    {
+      return (accepts_type<TMessageTypes>(id) || ...);
+    }
+
+    //********************************************
+    ETL_DEPRECATED bool is_null_router() const ETL_OVERRIDE
+    {
+      return false;
+    }
+
+    //********************************************
+    bool is_producer() const ETL_OVERRIDE
+    {
+      return true;
+    }
+
+    //********************************************
+    bool is_consumer() const ETL_OVERRIDE
+    {
+      return true;
+    }
+
+  private:
+
+    //********************************************
+    template <typename TMessage>
+    bool receive_message_type(const etl::imessage& msg)
+    {
+      if (TMessage::ID == msg.get_message_id())
+      {
+        static_cast<TDerived*>(this)->on_receive(static_cast<const TMessage&>(msg));
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+    }
+
+    //********************************************
+    template <typename TMessage>
+    bool accepts_type(etl::message_id_t id) const
+    {
+      if (TMessage::ID == id)
+      {
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+    }
+  };
+#else
+//*************************************************************************************************
+// For C++14 and below.
+//*************************************************************************************************
   /*[[[cog
       import cog
       ################################################
@@ -373,6 +496,25 @@ namespace etl
       cog.outl("         }")
       cog.outl("         break;")
       cog.outl("      }")
+      cog.outl("    }")
+      cog.outl("  }")
+      cog.outl("")
+      cog.outl("  template <typename TMessage>")
+      cog.outl("  void receive(const TMessage& msg, typename etl::enable_if<etl::is_base_of<imessage, TMessage>::value, int>::type = 0)")
+      cog.outl("  {")
+      cog.out("    if ETL_IF_CONSTEXPR (etl::is_one_of<TMessage, ")
+      for n in range(1, int(Handlers)):
+          cog.out("T%s, " % n)
+          if n % 4 == 0:
+              cog.outl("")
+              cog.out("                                                  ")
+      cog.outl("T%s>::value)" % int(Handlers))
+      cog.outl("    {")
+      cog.outl("      static_cast<TDerived*>(this)->on_receive(static_cast<const TMessage&>(msg));")
+      cog.outl("    }")
+      cog.outl("    else")
+      cog.outl("    {")
+      cog.outl("      static_cast<TDerived*>(this)->on_receive_unknown(msg);")
       cog.outl("    }")
       cog.outl("  }")
       cog.outl("")
@@ -496,6 +638,26 @@ namespace etl
           cog.outl("    }")
           cog.outl("  }")
           cog.outl("")
+          cog.outl("  template <typename TMessage>")
+          cog.outl("  void receive(const TMessage& msg, typename etl::enable_if<etl::is_base_of<imessage, TMessage>::value, int>::type = 0)")
+          cog.outl("  {")
+          cog.out("    if ETL_IF_CONSTEXPR (etl::is_one_of<TMessage, ")
+          for t in range(1, n):
+              cog.out("T%s, " % t)
+              if t % 4 == 0:
+                  cog.outl("")
+                  cog.out("                                                  ")
+          cog.outl("T%s>::value)" % n)
+          cog.outl("    {")
+          cog.outl("      static_cast<TDerived*>(this)->on_receive(static_cast<const TMessage&>(msg));")
+          cog.outl("    }")
+          cog.outl("    else")
+          cog.outl("    {")
+          cog.outl("      static_cast<TDerived*>(this)->on_receive_unknown(msg);")
+          cog.outl("    }")
+          cog.outl("  }")
+          cog.outl("")
+          cog.outl("")
           cog.outl("  //**********************************************")
           cog.outl("  using imessage_router::accepts;")
           cog.outl("")
@@ -536,6 +698,7 @@ namespace etl
           cog.outl("};")
   ]]]*/
   /*[[[end]]]*/
+#endif
 }
 
 #endif
