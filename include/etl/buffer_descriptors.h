@@ -202,7 +202,7 @@ namespace etl
     buffer_descriptors(TBuffer* pbuffers_, callback_type callback_ = callback_type())
       : callback(callback_)
     {
-      for (size_t i = 0U; i < N_BUFFERS; ++i)
+      for (size_t i = 0UL; i < N_BUFFERS; ++i)
       {
         descriptor_items[i].pbuffer = pbuffers_ + (i * BUFFER_SIZE);
         descriptor_items[i].in_use  = false;
@@ -218,7 +218,7 @@ namespace etl
     //*********************************
     void clear()
     {
-      for (size_t i = 0U; i < N_BUFFERS; ++i)
+      for (size_t i = 0UL; i < N_BUFFERS; ++i)
       {
         descriptor_items[i].in_use = false;
       }

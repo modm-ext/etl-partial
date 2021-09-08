@@ -37,6 +37,7 @@ SOFTWARE.
 #include "binary.h"
 #include "algorithm.h"
 #include "iterator.h"
+#include "memory.h"
 
 #include "private/minmax_push.h"
 
@@ -216,7 +217,7 @@ namespace etl
       unsigned char data[sizeof(T)];
       to_bytes(value, data);
 
-      for (size_t i = 0; i < sizeof(T); ++i)
+      for (size_t i = 0UL; i < sizeof(T); ++i)
       {
         if (!put_integral(uint32_t(data[i]), CHAR_BIT))
         {
@@ -305,14 +306,14 @@ namespace etl
         if (bits_remaining >= width)
         {
           // Temporary storage.
-          unsigned char data[sizeof(T)];
+          etl::uninitialized_buffer_of<T, 1U> data;
 
-          for (size_t i = 0; i < sizeof(T); ++i)
+          for (size_t i = 0UL; i < sizeof(T); ++i)
           {
-             get(data[i], CHAR_BIT);
+             get(data.raw[i], CHAR_BIT);
           }
 
-          from_bytes(data, value);
+          from_bytes(reinterpret_cast<const unsigned char*>(data.raw), value);
 
           success = true;
         }
@@ -478,7 +479,7 @@ namespace etl
     //***************************************************************************
     bool get_bit()
     {
-      bool result = (pdata[byte_index] & (1 << (bits_in_byte - 1))) != 0;
+      bool result = (pdata[byte_index] & (1U << (bits_in_byte - 1U))) != 0U;
 
       step(1U);
 
@@ -491,19 +492,19 @@ namespace etl
     template <typename T>
     void from_bytes(const unsigned char* data, T& value)
     {
-      unsigned char temp[sizeof(T)];
+      etl::uninitialized_buffer_of<T, 1U> temp;
 
       // Network to host.
       if (etl::endianness::value() == etl::endian::little)
       {
-        etl::reverse_copy(data, data + sizeof(T), temp);
+        etl::reverse_copy(data, data + sizeof(T), temp.raw);
       }
       else
       {
-        etl::copy(data, data + sizeof(T), temp);
+        etl::copy(data, data + sizeof(T), temp.raw);
       }
 
-      value = *reinterpret_cast<T*>(temp);
+      value = *reinterpret_cast<T*>(temp.raw);
     }
 
     //***************************************************************************

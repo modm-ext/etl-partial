@@ -56,7 +56,7 @@ namespace etl
   template <const size_t NV>
   struct permutations<NV, 0>
   {
-    static ETL_CONSTANT size_t value = 1;
+    static ETL_CONSTANT size_t value = 1UL;
   };
 
 #if ETL_CPP17_SUPPORTED

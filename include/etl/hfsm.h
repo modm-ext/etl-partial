@@ -118,7 +118,7 @@ namespace etl
     //*******************************************
     static size_t get_depth(etl::ifsm_state* s)
     {
-      size_t depth = 0;
+      size_t depth = 0UL;
 
       while (s != ETL_NULLPTR)
       {

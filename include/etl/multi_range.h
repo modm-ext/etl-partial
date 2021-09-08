@@ -144,7 +144,7 @@ namespace etl
     //***************************************************************************
     size_t number_of_ranges() const
     {
-      size_t count = 1U;
+      size_t count = 1UL;
 
       imulti_range* p_range = inner;
 
@@ -162,7 +162,7 @@ namespace etl
     //***************************************************************************
     size_t number_of_iterations()
     {
-      size_t count = 0U;
+      size_t count = 0UL;
 
       for (start(); !completed(); next())
       {

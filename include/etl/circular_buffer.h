@@ -333,7 +333,7 @@ namespace etl
         const difference_type lhs_index = lhs.get_index();
         const difference_type rhs_index = rhs.get_index();
         const difference_type reference_index = lhs.container().begin().get_index();
-        const size_t buffer_size = lhs.container().max_size() + 1;
+        const size_t buffer_size = lhs.container().max_size() + 1UL;
 
         const difference_type lhs_distance = (lhs_index < reference_index) ? buffer_size + lhs_index - reference_index : lhs_index - reference_index;
         const difference_type rhs_distance = (rhs_index < reference_index) ? buffer_size + rhs_index - reference_index : rhs_index - reference_index;
@@ -606,7 +606,7 @@ namespace etl
         const difference_type lhs_index = lhs.get_index();
         const difference_type rhs_index = rhs.get_index();
         const difference_type reference_index = lhs.container().begin().get_index();
-        const size_t buffer_size = lhs.container().max_size() + 1;
+        const size_t buffer_size = lhs.container().max_size() + 1UL;
 
         const difference_type lhs_distance = (lhs_index < reference_index) ? buffer_size + lhs_index - reference_index : lhs_index - reference_index;
         const difference_type rhs_distance = (rhs_index < reference_index) ? buffer_size + rhs_index - reference_index : rhs_index - reference_index;
