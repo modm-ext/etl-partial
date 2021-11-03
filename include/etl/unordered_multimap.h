@@ -38,7 +38,6 @@ SOFTWARE.
 #include "iterator.h"
 #include "functional.h"
 #include "utility.h"
-#include "container.h"
 #include "pool.h"
 #include "vector.h"
 #include "intrusive_forward_list.h"
@@ -1307,7 +1306,7 @@ namespace etl
     //*********************************************************************
     /// Adjust the first and last markers according to the erased entry.
     //*********************************************************************
-    void adjust_first_last_markers_after_erase(bucket_t* pbucket)
+    void adjust_first_last_markers_after_erase(bucket_t* pcurrent)
     {
       if (empty())
       {
@@ -1316,7 +1315,7 @@ namespace etl
       }
       else
       {
-        if (pbucket == first)
+        if (pcurrent == first)
         {
           // We erased the first so, we need to search again from where we erased.
           while (first->empty())
@@ -1324,22 +1323,22 @@ namespace etl
             ++first;
           }
         }
-        else if (pbucket == last)
+        else if (pcurrent == last)
         {
           // We erased the last, so we need to search again. Start from the first, go no further than the current last.
-          bucket_t* pbucket = first;
+          bucket_t* pcurrent = first;
           bucket_t* pend = last;
 
           last = first;
 
-          while (pbucket != pend)
+          while (pcurrent != pend)
           {
-            if (!pbucket->empty())
+            if (!pcurrent->empty())
             {
-              last = pbucket;
+              last = pcurrent;
             }
 
-            ++pbucket;
+            ++pcurrent;
           }
         }
         else
