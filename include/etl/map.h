@@ -7,7 +7,7 @@ Embedded Template Library.
 https://github.com/ETLCPP/etl
 https://www.etlcpp.com
 
-Copyright(c) 2014 jwellbelove, rlindeman
+Copyright(c) 2021 jwellbelove
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files(the "Software"), to deal
@@ -43,6 +43,7 @@ SOFTWARE.
 #include "debug_count.h"
 #include "nullptr.h"
 #include "type_traits.h"
+#include "nth_type.h"
 #include "parameter_type.h"
 #include "iterator.h"
 #include "utility.h"
@@ -993,15 +994,6 @@ namespace etl
     //*************************************************************************
     /// Erases the value at the specified position.
     //*************************************************************************
-    void erase(iterator position)
-    {
-      // Remove the node by its key
-      erase((*position).first);
-    }
-
-    //*************************************************************************
-    /// Erases the value at the specified position.
-    //*************************************************************************
     iterator erase(const_iterator position)
     {
       // Find the parent node to be removed
@@ -1021,20 +1013,6 @@ namespace etl
     {
       // Return 1 if key value was found and removed
       return remove_node(root_node, key) ? 1 : 0;
-    }
-
-    //*************************************************************************
-    /// Erases a range of elements.
-    //*************************************************************************
-    iterator erase(iterator first, iterator last)
-    {
-      iterator next;
-      while (first != last)
-      {
-        next = erase(const_iterator(first++));
-      }
-
-      return next;
     }
 
     //*************************************************************************
@@ -1127,7 +1105,7 @@ namespace etl
     ///\param position The position that would precede the value to insert.
     ///\param value    The value to insert.
     //*********************************************************************
-    iterator insert(iterator, const_reference value)
+    iterator insert(const_iterator /*position*/, const_reference value)
     {
       // Default to no inserted node
       Node* inserted_node = ETL_NULLPTR;
@@ -1151,55 +1129,7 @@ namespace etl
     ///\param position The position that would precede the value to insert.
     ///\param value    The value to insert.
     //*********************************************************************
-    iterator insert(iterator, rvalue_reference value)
-    {
-      // Default to no inserted node
-      Node* inserted_node = ETL_NULLPTR;
-
-      ETL_ASSERT(!full(), ETL_ERROR(map_full));
-
-      // Get next available free node
-      Data_Node& node = allocate_data_node(etl::move(value));
-
-      // Obtain the inserted node (might be ETL_NULLPTR if node was a duplicate)
-      inserted_node = insert_node(root_node, node);
-
-      // Insert node into tree and return iterator to new node location in tree
-      return iterator(*this, inserted_node);
-    }
-#endif
-
-    //*********************************************************************
-    /// Inserts a value to the map starting at the position recommended.
-    /// If asserts or exceptions are enabled, emits map_full if the map is already full.
-    ///\param position The position that would precede the value to insert.
-    ///\param value    The value to insert.
-    //*********************************************************************
-    iterator insert(const_iterator, const_reference value)
-    {
-      // Default to no inserted node
-      Node* inserted_node = ETL_NULLPTR;
-
-      ETL_ASSERT(!full(), ETL_ERROR(map_full));
-
-      // Get next available free node
-      Data_Node& node = allocate_data_node(value);
-
-      // Obtain the inserted node (might be ETL_NULLPTR if node was a duplicate)
-      inserted_node = insert_node(root_node, node);
-
-      // Insert node into tree and return iterator to new node location in tree
-      return iterator(*this, inserted_node);
-    }
-
-#if ETL_CPP11_SUPPORTED
-    //*********************************************************************
-    /// Inserts a value to the map starting at the position recommended.
-    /// If asserts or exceptions are enabled, emits map_full if the map is already full.
-    ///\param position The position that would precede the value to insert.
-    ///\param value    The value to insert.
-    //*********************************************************************
-    iterator insert(const_iterator, rvalue_reference value)
+    iterator insert(const_iterator /*position*/, rvalue_reference value)
     {
       // Default to no inserted node
       Node* inserted_node = ETL_NULLPTR;
@@ -2214,7 +2144,7 @@ namespace etl
       this->assign(first, last);
     }
 
-#if ETL_CPP11_SUPPORTED && ETL_NOT_USING_STLPORT && ETL_USING_STL
+#if ETL_USING_INITIALIZER_LIST
     //*************************************************************************
     /// Constructor, from an initializer_list.
     //*************************************************************************
@@ -2279,12 +2209,22 @@ namespace etl
   //*************************************************************************
   /// Template deduction guides.
   //*************************************************************************
-#if ETL_CPP17_SUPPORTED && ETL_NOT_USING_STLPORT && ETL_USING_STL
-  template <typename T, typename... Ts>
-  map(T, Ts...)
-    ->map<etl::enable_if_t<(etl::is_same_v<T, Ts> && ...), typename T::first_type>,
-          typename T::second_type,
-          1U + sizeof...(Ts)>;
+#if ETL_CPP17_SUPPORTED && ETL_USING_INITIALIZER_LIST
+  template <typename... TPairs>
+  map(TPairs...) -> map<typename etl::nth_type_t<0, TPairs...>::first_type,
+                        typename etl::nth_type_t<0, TPairs...>::second_type,
+                        sizeof...(TPairs)>;
+#endif
+
+  //*************************************************************************
+  /// Make
+  //*************************************************************************
+#if ETL_CPP11_SUPPORTED && ETL_USING_INITIALIZER_LIST
+  template <typename TKey, typename TMapped, typename TKeyCompare = etl::less<TKey>, typename... TPairs>
+  constexpr auto make_map(TPairs&&... pairs) -> etl::map<TKey, TMapped, sizeof...(TPairs), TKeyCompare>
+  {
+    return { {etl::forward<TPairs>(pairs)...} };
+  }
 #endif
 
   //***************************************************************************

@@ -44,6 +44,7 @@ SOFTWARE.
 #include "debug_count.h"
 #include "nullptr.h"
 #include "type_traits.h"
+#include "nth_type.h"
 #include "utility.h"
 #include "placement_new.h"
 
@@ -1085,10 +1086,10 @@ namespace etl
     //*************************************************************************
     /// Erases the value at the specified position.
     //*************************************************************************
-    void erase(iterator position)
+    iterator erase(iterator position)
     {
       // Remove the node by its node specified in iterator position
-      (void)erase(const_iterator(position));
+      return erase(const_iterator(position));
     }
 
     //*************************************************************************
@@ -1128,20 +1129,6 @@ namespace etl
 
       // Return the total count erased
       return d;
-    }
-
-    //*************************************************************************
-    /// Erases a range of elements.
-    //*************************************************************************
-    iterator erase(iterator first, iterator last)
-    {
-      iterator next;
-      while (first != last)
-      {
-        next = erase(const_iterator(first++));
-      }
-
-      return next;
     }
 
     //*************************************************************************
@@ -1221,32 +1208,6 @@ namespace etl
 
       // Insert node into tree and return iterator to new node location in tree
       return iterator(*this, inserted_node);
-    }
-#endif
-
-    //*********************************************************************
-    /// Inserts a value to the multiset starting at the position recommended.
-    /// If asserts or exceptions are enabled, emits set_full if the multiset is already full.
-    ///\param position The position that would precede the value to insert.
-    ///\param value    The value to insert.
-    //*********************************************************************
-    iterator insert(iterator /*position*/, const_reference value)
-    {
-      // Ignore position provided and just do a normal insert
-      return insert(value);
-    }
-
-#if ETL_CPP11_SUPPORTED
-    //*********************************************************************
-    /// Inserts a value to the multiset starting at the position recommended.
-    /// If asserts or exceptions are enabled, emits set_full if the multiset is already full.
-    ///\param position The position that would precede the value to insert.
-    ///\param value    The value to insert.
-    //*********************************************************************
-    iterator insert(iterator /*position*/, rvalue_reference value)
-    {
-      // Ignore position provided and just do a normal insert
-      return insert(etl::move(value));
     }
 #endif
 
@@ -2057,7 +2018,7 @@ namespace etl
       this->assign(first, last);
     }
 
-#if ETL_CPP11_SUPPORTED && ETL_NOT_USING_STLPORT && ETL_USING_STL
+#if ETL_USING_INITIALIZER_LIST
     //*************************************************************************
     /// Constructor, from an initializer_list.
     //*************************************************************************
@@ -2121,10 +2082,20 @@ namespace etl
   //*************************************************************************
   /// Template deduction guides.
   //*************************************************************************
-#if ETL_CPP17_SUPPORTED && ETL_NOT_USING_STLPORT && ETL_USING_STL
-  template <typename T, typename... Ts>
-  multiset(T, Ts...)
-    ->multiset<etl::enable_if_t<(etl::is_same_v<T, Ts> && ...), T>, 1U + sizeof...(Ts)>;
+#if ETL_CPP17_SUPPORTED && ETL_USING_INITIALIZER_LIST
+  template <typename... T>
+  multiset(T...) -> multiset<etl::nth_type_t<0, T...>, sizeof...(T)>;
+#endif
+
+  //*************************************************************************
+  /// Make
+  //*************************************************************************
+#if ETL_CPP11_SUPPORTED && ETL_USING_INITIALIZER_LIST
+  template <typename TKey, typename TKeyCompare = etl::less<TKey>, typename... T>
+  constexpr auto make_multiset(T&&... keys) -> etl::multiset<TKey, sizeof...(T), TKeyCompare>
+  {
+    return { {etl::forward<T>(keys)...} };
+  }
 #endif
 
   //***************************************************************************

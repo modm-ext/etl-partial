@@ -43,6 +43,7 @@ SOFTWARE.
 #include "debug_count.h"
 #include "nullptr.h"
 #include "type_traits.h"
+#include "nth_type.h"
 #include "parameter_type.h"
 #include "iterator.h"
 #include "utility.h"
@@ -1101,10 +1102,10 @@ namespace etl
     //*************************************************************************
     /// Erases the value at the specified position.
     //*************************************************************************
-    void erase(iterator position)
+    iterator erase(iterator position)
     {
       // Remove the node by its node specified in iterator position
-      (void)erase(const_iterator(position));
+      return erase(const_iterator(position));
     }
 
     //*************************************************************************
@@ -1144,20 +1145,6 @@ namespace etl
 
       // Return the total count erased
       return d;
-    }
-
-    //*************************************************************************
-    /// Erases a range of elements.
-    //*************************************************************************
-    iterator erase(iterator first, iterator last)
-    {
-      iterator next;
-      while (first != last)
-      {
-        next = erase(const_iterator(first++));
-      }
-
-      return next;
     }
 
     //*************************************************************************
@@ -1246,18 +1233,6 @@ namespace etl
     ///\param position The position that would precede the value to insert.
     ///\param value    The value to insert.
     //*********************************************************************
-    iterator insert(iterator /*position*/, const_reference value)
-    {
-      // Ignore position provided and just do a normal insert
-      return insert(value);
-    }
-
-    //*********************************************************************
-    /// Inserts a value to the multimap starting at the position recommended.
-    /// If asserts or exceptions are enabled, emits map_full if the multimap is already full.
-    ///\param position The position that would precede the value to insert.
-    ///\param value    The value to insert.
-    //*********************************************************************
     iterator insert(const_iterator /*position*/, const_reference value)
     {
       // Ignore position provided and just do a normal insert
@@ -1265,18 +1240,6 @@ namespace etl
     }
 
 #if ETL_CPP11_SUPPORTED
-    //*********************************************************************
-    /// Inserts a value to the multimap starting at the position recommended.
-    /// If asserts or exceptions are enabled, emits map_full if the multimap is already full.
-    ///\param position The position that would precede the value to insert.
-    ///\param value    The value to insert.
-    //*********************************************************************
-    iterator insert(iterator /*position*/, rvalue_reference value)
-    {
-      // Ignore position provided and just do a normal insert
-      return insert(etl::move(value));
-    }
-
     //*********************************************************************
     /// Inserts a value to the multimap starting at the position recommended.
     /// If asserts or exceptions are enabled, emits map_full if the multimap is already full.
@@ -2076,7 +2039,7 @@ namespace etl
       this->assign(first, last);
     }
 
-#if ETL_CPP11_SUPPORTED && ETL_NOT_USING_STLPORT && ETL_USING_STL
+#if ETL_USING_INITIALIZER_LIST
     //*************************************************************************
     /// Constructor, from an initializer_list.
     //*************************************************************************
@@ -2138,12 +2101,22 @@ namespace etl
   //*************************************************************************
   /// Template deduction guides.
   //*************************************************************************
-#if ETL_CPP17_SUPPORTED && ETL_NOT_USING_STLPORT && ETL_USING_STL
-  template <typename T, typename... Ts>
-  multimap(T, Ts...)
-    ->multimap<etl::enable_if_t<(etl::is_same_v<T, Ts> && ...), typename T::first_type>,
-                typename T::second_type,
-                1U + sizeof...(Ts)>;
+#if ETL_CPP17_SUPPORTED && ETL_USING_INITIALIZER_LIST
+  template <typename... TPairs>
+  multimap(TPairs...) -> multimap<typename etl::nth_type_t<0, TPairs...>::first_type,
+                                  typename etl::nth_type_t<0, TPairs...>::second_type,
+                                  sizeof...(TPairs)>;
+#endif
+
+  //*************************************************************************
+  /// Make
+  //*************************************************************************
+#if ETL_CPP11_SUPPORTED && ETL_USING_INITIALIZER_LIST
+  template <typename TKey, typename TMapped, typename TKeyCompare = etl::less<TKey>, typename... TPairs>
+  constexpr auto make_multimap(TPairs&&... pairs) -> etl::multimap<TKey, TMapped, sizeof...(TPairs), TKeyCompare>
+  {
+    return { {etl::forward<TPairs>(pairs)...} };
+  }
 #endif
 
   //***************************************************************************

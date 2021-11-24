@@ -1,5 +1,3 @@
-///\file
-
 /******************************************************************************
 The MIT License(MIT)
 
@@ -28,23 +26,41 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef ETL_VERSION_INCLUDED
-#define ETL_VERSION_INCLUDED
+#ifndef ETL_NTH_TYPE_INCLUDED
+#define ETL_NTH_TYPE_INCLUDED
 
-#include "macros.h"
+#include "platform.h"
 
-///\defgroup version version
-/// Definitions of the ETL version
-///\ingroup utilities
+namespace etl
+{
+#if ETL_CPP11_SUPPORTED
+  //***************************************************************************
+  // nth_type
+  //***************************************************************************
+  namespace private_nth_type
+  {
+    template <size_t N, typename T1, typename... TRest>
+    struct nth_type_helper
+    {
+      using type = typename nth_type_helper<N - 1U, TRest...>::type;
+    };
 
-#define ETL_VERSION_MAJOR 20
-#define ETL_VERSION_MINOR 20
-#define ETL_VERSION_PATCH  0
-#define ETL_VERSION       ETL_STRINGIFY(ETL_VERSION_MAJOR) "." ETL_STRINGIFY(ETL_VERSION_MINOR) "." ETL_STRINGIFY(ETL_VERSION_PATCH)
-#define ETL_VERSION_W     ETL_STRINGIFY(ETL_VERSION_MAJOR) L"." ETL_STRINGIFY(ETL_VERSION_MINOR) L"." ETL_STRINGIFY(ETL_VERSION_PATCH)
-#define ETL_VERSION_U16   ETL_STRINGIFY(ETL_VERSION_MAJOR) u"." ETL_STRINGIFY(ETL_VERSION_MINOR) u"." ETL_STRINGIFY(ETL_VERSION_PATCH)
-#define ETL_VERSION_U32   ETL_STRINGIFY(ETL_VERSION_MAJOR) U"." ETL_STRINGIFY(ETL_VERSION_MINOR) U"." ETL_STRINGIFY(ETL_VERSION_PATCH)
-#define ETL_VERSION_VALUE ((ETL_VERSION_MAJOR * 10000) + (ETL_VERSION_MINOR * 100) + ETL_VERSION_PATCH)
+    template <size_t N, typename T1>
+    struct nth_type_helper<N, T1>
+    {
+      using type = T1;
+    };
+  }
+
+  template <size_t N, typename... TTypes>
+  struct nth_type
+  {
+    using type = typename private_nth_type::nth_type_helper<N, TTypes...>::type;
+  };
+
+  template <size_t N, typename... TTypes>
+  using nth_type_t = typename nth_type<N, TTypes...>::type;
+#endif
+}
 
 #endif
-
