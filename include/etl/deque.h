@@ -1961,7 +1961,7 @@ namespace etl
     //*************************************************************************
     void resize(size_t new_size, const value_type& value = value_type())
     {
-      ETL_ASSERT(new_size <= CAPACITY, ETL_ERROR(deque_out_of_bounds));
+      ETL_ASSERT(new_size <= CAPACITY, ETL_ERROR(deque_full));
 
       // Make it smaller?
       if (new_size < current_size)
@@ -2450,15 +2450,15 @@ namespace etl
   //*************************************************************************
   /// Template deduction guides.
   //*************************************************************************
-#if ETL_CPP17_SUPPORTED
+#if ETL_CPP17_SUPPORTED && ETL_USING_INITIALIZER_LIST
   template <typename... T>
-  deque(T...) -> deque<typename etl::common_type<T...>::type, sizeof...(T)>;
+  deque(T...) -> deque<typename etl::common_type_t<T...>, sizeof...(T)>;
 #endif
 
   //*************************************************************************
   /// Make
   //*************************************************************************
-#if ETL_USING_INITIALIZER_LIST
+#if ETL_CPP11_SUPPORTED && ETL_USING_INITIALIZER_LIST
   template <typename T, typename... TValues>
   constexpr auto make_deque(TValues&&... values) -> etl::deque<T, sizeof...(TValues)>
   {
