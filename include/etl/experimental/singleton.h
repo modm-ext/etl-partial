@@ -28,51 +28,60 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef ETL_CRC16_RIELLO_INCLUDED
-#define ETL_CRC16_RIELLO_INCLUDED
+#ifndef ETL_SINGLETON_INCLUDED
+#define ETL_SINGLETON_INCLUDED
 
 #include "platform.h"
-#include "private/crc_implementation.h"
-
-///\defgroup crc16_riello 16 bit CRC calculation
-///\ingroup crc
 
 namespace etl
 {
-#if ETL_CPP11_SUPPORTED && !defined(ETL_CRC_FORCE_CPP03_IMPLEMENTATION)
-  template <size_t Table_Size>
-  using crc16_riello_t = etl::crc_type<etl::private_crc::crc16_riello_parameters, Table_Size>;
-#else
-  template <size_t Table_Size>
-  class crc16_riello_t : public etl::crc_type<etl::private_crc::crc16_riello_parameters, Table_Size>
+  //***************************************************************************
+  /// Creates .
+  //***************************************************************************
+  template <typename TObject>
+  class singleton
   {
   public:
 
-    //*************************************************************************
-    /// Default constructor.
-    //*************************************************************************
-    crc16_riello_t()
+    static TObject& get_instance()
     {
-      this->reset();
+      return p_instance.get();
     }
 
-    //*************************************************************************
-    /// Constructor from range.
-    /// \param begin Start of the range.
-    /// \param end   End of the range.
-    //*************************************************************************
-    template<typename TIterator>
-    crc16_riello_t(TIterator begin, const TIterator end)
-    {
-      this->reset();
-      this->add(begin, end);
-    }
+  protected:
+
+    static TObject* p_instance;
+
+  private:
+
+    singleton() ETL_DELETE;
+    singleton(const singleton&) ETL_DELETE;
+    singleton& operator =(const singleton&) ETL_DELETE;
   };
-#endif
 
-  typedef etl::crc16_riello_t<256U> crc16_riello_t256;
-  typedef etl::crc16_riello_t<16U>  crc16_riello_t16;
-  typedef etl::crc16_riello_t<4U>   crc16_riello_t4;
-  typedef crc16_riello_t256         crc16_riello;
+
+  template <typename TSingleton>
+  class singleton_factory
+  {
+    virtual ~singleton_factory() {}
+
+    template <typename... TArgs>
+    TSingleton* create(TArgs args...)
+    {
+      if (is_created)
+      {
+        return TSingleton::mp_Instance.get();
+      }
+
+
+      is_created = true;
+      static Singleton Tmp;
+      _TSingleton::mp_Instance.reset(pTmp);
+
+      return _TSingleton::mp_Instance.get();
+    }
+
+  };
 }
+
 #endif
