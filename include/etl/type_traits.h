@@ -71,11 +71,17 @@ SOFTWARE.
 
 namespace etl
 {
+#if ETL_CPP11_SUPPORTED
+  template <typename...>
+  using void_t = void;
+#endif
+
 #if ETL_NOT_USING_STL || ETL_CPP11_NOT_SUPPORTED
 
   //*****************************************************************************
   // Traits are defined by the ETL
   //*****************************************************************************
+
   //***************************************************************************
   /// integral_constant
   template <typename T, const T VALUE>
@@ -1257,7 +1263,6 @@ namespace etl
     static const T value = FALSE_VALUE;
   };
 
-
 #if ETL_CPP11_SUPPORTED
   //***************************************************************************
   /// Template to determine if a type is one of a specified list.
@@ -2016,12 +2021,12 @@ namespace etl
 
 #endif
 
+#if ETL_CPP11_SUPPORTED
   //*********************************************
   // common_type
   // Based on the sample implementation detailed on
   // https://en.cppreference.com/w/cpp/types/common_type
   //*********************************************
-#if ETL_CPP11_SUPPORTED
   //***********************************
   // Primary template
   template<typename...>
@@ -2038,9 +2043,6 @@ namespace etl
 
   namespace private_common_type
   {
-    template <typename...>
-    using void_t = void;
-
     template <typename T1, typename T2>
     using conditional_result_t = decltype(false ? declval<T1>() : declval<T2>());
 
@@ -2071,7 +2073,7 @@ namespace etl
   // Two types
   template <typename T1, typename T2>
   struct common_type<T1, T2>
-    : etl::conditional<etl::is_same<T1, typename etl::decay<T1>::type>::value && etl::is_same<T2, typename etl::decay<T2>::type>::value,
+    : etl::conditional<etl::is_same<T1, typename etl::decay<T1>::type>::value&& etl::is_same<T2, typename etl::decay<T2>::type>::value,
                        private_common_type::common_type_2_impl<T1, T2>,
                        common_type<typename etl::decay<T2>::type,
                        typename etl::decay<T2>::type>>::type
