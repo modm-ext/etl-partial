@@ -113,15 +113,13 @@ SOFTWARE.
 #include "profiles/determine_development_os.h"
 
 //*************************************
-// Figure out if we can use the standard library <new> header, if haven't already done so in etl_profile.h
-#if !defined(ETL_USING_STD_NEW)
-  #if defined(__has_include)
-    #define ETL_USING_STD_NEW __has_include(<new>)
-  #elif ETL_NOT_USING_STL || (defined(ARDUINO) && defined(__AVR__))
-    #define ETL_USING_STD_NEW 0
-  #else
-    #define ETL_USING_STD_NEW 1
-  #endif
+// Check WCHAR_MIN and WCHAR_MAX
+#if !defined(WCHAR_MIN)
+  #define WCHAR_MIN 0x0000
+#endif
+
+#if !defined(WCHAR_MAX)
+  #define WCHAR_MAX 0xFFFF
 #endif
 
 //*************************************
