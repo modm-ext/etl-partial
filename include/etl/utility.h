@@ -443,6 +443,80 @@ namespace etl
   template <typename T>
   typename etl::add_rvalue_reference<T>::type declval() ETL_NOEXCEPT;
 #endif
+
+#if ETL_USING_CPP11
+  //*************************************************************************
+  /// A function wrapper for free/global functions.
+  //*************************************************************************
+  template <typename TReturn, typename... TParams>
+  class functor
+  {
+  public:
+
+    //*********************************
+    /// Constructor.
+    //*********************************
+    constexpr functor(TReturn(*ptr_)(TParams...))
+      : ptr(ptr_)
+    {
+    }
+
+    //*********************************
+    /// Const function operator.
+    //*********************************
+    constexpr TReturn operator()(TParams... args) const
+    {
+      return ptr(etl::forward<TParams>(args)...);
+    }
+
+  private:
+
+    /// The pointer to the function.
+    TReturn(*ptr)(TParams...);
+  };
+#endif
+
+#if ETL_USING_CPP11
+  //*****************************************************************************
+  // A wrapper for a member function
+  // Creates a static member function that calls the specified member function.
+  //*****************************************************************************
+  template <typename T>
+  class member_function_wrapper;
+
+  template <typename TReturn, typename... TParams>
+  class member_function_wrapper<TReturn(TParams...)>
+  {
+  public:
+
+    template <typename T, T& Instance, TReturn(T::* Method)(TParams...)>
+    static constexpr TReturn function(TParams... params)
+    {
+      return (Instance.*Method)(etl::forward<TParams>(params)...);
+    }
+  };
+#endif
+
+#if ETL_USING_CPP11
+  //*****************************************************************************
+  // A wrapper for a functor
+  // Creates a static member function that calls the specified functor.
+  //*****************************************************************************
+  template <typename T>
+  class functor_wrapper;
+
+  template <typename TReturn, typename... TParams>
+  class functor_wrapper<TReturn(TParams...)>
+  {
+  public:
+
+    template <typename TFunctor, TFunctor& Instance>
+    static constexpr TReturn function(TParams... params)
+    {
+      return Instance(etl::forward<TParams>(params)...);
+    }
+  };
+#endif
 }
 
 #endif
