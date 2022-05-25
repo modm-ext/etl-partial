@@ -1550,6 +1550,24 @@ namespace etl
       return (p != ETL_NULLPTR);
     }
 
+#if ETL_USING_CPP11 && ETL_USING_STL
+    //*********************************
+    unique_ptr& operator =(std::nullptr_t) ETL_NOEXCEPT
+    {
+      reset(nullptr);
+
+      return *this;
+    }
+#else
+    //*********************************
+    unique_ptr& operator =(void*) ETL_NOEXCEPT
+    {
+      reset(NULL);
+
+      return *this;
+    }
+#endif
+
 #if ETL_USING_CPP11
     //*********************************
     unique_ptr& operator =(unique_ptr&& p_) ETL_NOEXCEPT
@@ -1629,7 +1647,7 @@ bool operator >=(const etl::unique_ptr<T1, TD1>&lhs, const etl::unique_ptr<T2, T
 namespace etl
 {
   //*****************************************************************************
-  /// Default contruct an item at address p.
+  /// Default construct an item at address p.
   ///\ingroup memory
   //*****************************************************************************
   template <typename T>
@@ -1639,7 +1657,7 @@ namespace etl
   }
 
   //*****************************************************************************
-  /// Default contruct an item at address p.
+  /// Default construct an item at address p.
   ///\ingroup memory
   //*****************************************************************************
   template <typename T, typename TCounter>
@@ -1650,7 +1668,7 @@ namespace etl
   }
 
   //*****************************************************************************
-  /// Default contruct an item at address p.
+  /// Default construct an item at address p.
   ///\ingroup memory
   //*****************************************************************************
   template <typename T>
@@ -1661,7 +1679,7 @@ namespace etl
   }
 
   //*****************************************************************************
-  /// Default contruct an item at address p.
+  /// Default construct an item at address p.
   ///\ingroup memory
   //*****************************************************************************
   template <typename T, typename TCounter>
