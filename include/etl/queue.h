@@ -7,7 +7,7 @@ Embedded Template Library.
 https://github.com/ETLCPP/etl
 https://www.etlcpp.com
 
-Copyright(c) 2014 jwellbelove, Mark Kitson
+Copyright(c) 2014 John Wellbelove, Mark Kitson
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files(the "Software"), to deal
@@ -197,7 +197,7 @@ namespace etl
     }
 
     //*************************************************************************
-    /// Decrements (and wraps) the 'out' index value to record a queue deletion.
+    /// Increments (and wraps) the 'out' index value to record a queue deletion.
     //*************************************************************************
     void del_out()
     {
