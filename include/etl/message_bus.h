@@ -26,12 +26,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef ETL_MESSAGE_BUS_
-#define ETL_MESSAGE_BUS_
+#ifndef ETL_MESSAGE_BUS_INCLUDED
+#define ETL_MESSAGE_BUS_INCLUDED
 
 #include <stdint.h>
-#include "algorithm.h"
-
 #include "platform.h"
 #include "algorithm.h"
 #include "vector.h"
@@ -208,9 +206,9 @@ namespace etl
           // Do any message buses.
           // These are always at the end of the list.
           router_list_t::iterator irouter = etl::lower_bound(router_list.begin(),
-                                     router_list.end(),
-                                     etl::imessage_bus::MESSAGE_BUS,
-                                     compare_router_id());
+                                                             router_list.end(),
+                                                             etl::imessage_bus::MESSAGE_BUS,
+                                                             compare_router_id());
 
           while (irouter != router_list.end())
           {
@@ -336,7 +334,7 @@ namespace etl
     //*******************************************
     void clear()
     {
-      return router_list.clear();
+      router_list.clear();
     }
 
     //********************************************
@@ -365,6 +363,15 @@ namespace etl
     imessage_bus(router_list_t& list)
       : imessage_router(etl::imessage_router::MESSAGE_BUS),
         router_list(list)
+    {
+    }
+
+    //*******************************************
+    /// Constructor.
+    //*******************************************
+    imessage_bus(router_list_t& list, etl::imessage_router& successor)
+      : imessage_router(etl::imessage_router::MESSAGE_BUS, successor),
+      router_list(list)
     {
     }
 
@@ -405,29 +412,18 @@ namespace etl
     {
     }
 
+    //*******************************************
+    /// Constructor.
+    //*******************************************
+    message_bus(etl::imessage_router& successor)
+      : imessage_bus(router_list, successor)
+    {
+    }
+
   private:
 
     etl::vector<etl::imessage_router*, MAX_ROUTERS_> router_list;
   };
-
-  //***************************************************************************
-  /// Send a message to a bus.
-  //***************************************************************************
-  static inline void send_message(etl::imessage_bus&   bus,
-                                  const etl::imessage& message)
-  {
-    bus.receive(message);
-  }
-
-  //***************************************************************************
-  /// Send a message to a bus.
-  //***************************************************************************
-  static inline void send_message(etl::imessage_bus&       bus,
-                                  etl::message_router_id_t id,
-                                  const etl::imessage&     message)
-  {
-    bus.receive(id, message);
-  }
 }
 
 #endif
