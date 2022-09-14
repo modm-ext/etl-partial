@@ -33,6 +33,7 @@ SOFTWARE.
 
 #include "platform.h"
 #include "iterator.h"
+#include "circular_iterator.h"
 #include "nullptr.h"
 #include "hash.h"
 #include "type_traits.h"
@@ -66,11 +67,12 @@ namespace etl
     typedef const T&                         const_reference;
     typedef T*                               pointer;
     typedef const T*                         const_pointer;
-    typedef T*                               iterator;
-    typedef const T*                         const_iterator;
 
-    typedef ETL_OR_STD::reverse_iterator<iterator>       reverse_iterator;
-    typedef ETL_OR_STD::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef T*                                     iterator;
+    typedef ETL_OR_STD::reverse_iterator<iterator> reverse_iterator;
+
+    typedef etl::circular_iterator<pointer>                                circular_iterator;
+    typedef etl::circular_iterator<ETL_OR_STD::reverse_iterator<pointer> > reverse_circular_iterator;
 
     static ETL_CONSTANT size_t extent = Extent;
 
@@ -83,10 +85,10 @@ namespace etl
     }
 
     //*************************************************************************
-    /// Construct from pointer + size
+    /// Construct from iterators + size
     //*************************************************************************
     template <typename TIterator, typename TSize>
-    ETL_CONSTEXPR span(const TIterator begin_, const TSize /*size_*/) ETL_NOEXCEPT
+    ETL_CONSTEXPR explicit span(const TIterator begin_, const TSize /*size_*/) ETL_NOEXCEPT
       : pbegin(etl::addressof(*begin_))
     {
     }
@@ -95,7 +97,7 @@ namespace etl
     /// Construct from iterators
     //*************************************************************************
     template <typename TIterator>
-    ETL_CONSTEXPR span(const TIterator begin_, const TIterator /*end_*/)
+    ETL_CONSTEXPR explicit span(const TIterator begin_, const TIterator /*end_*/)
       : pbegin(etl::addressof(*begin_))
     {
     }
@@ -214,6 +216,15 @@ namespace etl
     }
 
     //*************************************************************************
+    /// Copy constructor
+    //*************************************************************************
+    template <typename U, size_t N>
+    ETL_CONSTEXPR span(const etl::span<U, N>& other, typename etl::enable_if<(Extent == etl::dynamic_extent) || (N == etl::dynamic_extent) || (N == Extent), void>::type) ETL_NOEXCEPT
+      : pbegin(other.pbegin)
+    {
+    }
+
+    //*************************************************************************
     /// Returns a reference to the first element.
     //*************************************************************************
     ETL_NODISCARD ETL_CONSTEXPR reference front() const ETL_NOEXCEPT
@@ -246,6 +257,14 @@ namespace etl
     }
 
     //*************************************************************************
+    /// Returns a circular iterator to the beginning of the span.
+    //*************************************************************************
+    ETL_NODISCARD ETL_CONSTEXPR circular_iterator begin_circular() const ETL_NOEXCEPT
+    {
+      return circular_iterator(begin(), end());
+    }
+
+    //*************************************************************************
     /// Returns an iterator to the end of the span.
     //*************************************************************************
     ETL_NODISCARD ETL_CONSTEXPR iterator end() const ETL_NOEXCEPT
@@ -259,6 +278,14 @@ namespace etl
     ETL_NODISCARD ETL_CONSTEXPR reverse_iterator rbegin() const ETL_NOEXCEPT
     {
       return reverse_iterator((pbegin + Extent));
+    }
+
+    //*************************************************************************
+    /// Returns a reverse circular iterator to the end of the span.
+    //*************************************************************************
+    ETL_NODISCARD ETL_CONSTEXPR reverse_circular_iterator rbegin_circular() const ETL_NOEXCEPT
+    {
+      return reverse_circular_iterator(rbegin(), rend());
     }
 
     //*************************************************************************
@@ -410,10 +437,12 @@ namespace etl
     typedef const T& const_reference;
     typedef T*       pointer;
     typedef const T* const_pointer;
-    typedef T*       iterator;
-    typedef const T* const_iterator;
-    typedef ETL_OR_STD::reverse_iterator<iterator>       reverse_iterator;
-    typedef ETL_OR_STD::reverse_iterator<const_iterator> const_reverse_iterator;
+
+    typedef T*                                     iterator;
+    typedef ETL_OR_STD::reverse_iterator<iterator> reverse_iterator;
+
+    typedef etl::circular_iterator<pointer>                                circular_iterator;
+    typedef etl::circular_iterator<ETL_OR_STD::reverse_iterator<pointer> > reverse_circular_iterator;
 
     static ETL_CONSTANT size_t extent = etl::dynamic_extent;
 
@@ -571,6 +600,16 @@ namespace etl
     }
 
     //*************************************************************************
+    /// Copy constructor
+    //*************************************************************************
+    template <typename U, size_t N>
+    ETL_CONSTEXPR span(const etl::span<U, N>& other) ETL_NOEXCEPT
+      : pbegin(other.begin())
+      , pend(other.begin() + N)
+    {
+    }
+
+    //*************************************************************************
     /// Returns a reference to the first element.
     //*************************************************************************
     ETL_NODISCARD ETL_CONSTEXPR reference front() const ETL_NOEXCEPT
@@ -603,6 +642,14 @@ namespace etl
     }
 
     //*************************************************************************
+    /// Returns a circular iterator to the beginning of the span.
+    //*************************************************************************
+    ETL_NODISCARD ETL_CONSTEXPR circular_iterator begin_circular() const ETL_NOEXCEPT
+    {
+      return circular_iterator(begin(), end());
+    }
+
+    //*************************************************************************
     /// Returns an iterator to the end of the span.
     //*************************************************************************
     ETL_NODISCARD ETL_CONSTEXPR iterator end() const ETL_NOEXCEPT
@@ -616,6 +663,14 @@ namespace etl
     ETL_NODISCARD ETL_CONSTEXPR reverse_iterator rbegin() const ETL_NOEXCEPT
     {
       return reverse_iterator(pend);
+    }
+
+    //*************************************************************************
+    /// Returns a reverse circular iterator to the end of the span.
+    //*************************************************************************
+    ETL_NODISCARD ETL_CONSTEXPR reverse_circular_iterator rbegin_circular() const ETL_NOEXCEPT
+    {
+      return reverse_circular_iterator(rbegin(), rend());
     }
 
     //*************************************************************************

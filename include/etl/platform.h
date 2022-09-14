@@ -31,6 +31,7 @@ SOFTWARE.
 #ifndef ETL_PLATFORM_INCLUDED
 #define ETL_PLATFORM_INCLUDED
 
+#include <stddef.h>
 #include <stdint.h>
 #include <limits.h>
 
@@ -228,6 +229,8 @@ SOFTWARE.
   #define ETL_FINAL     final
   #define ETL_NORETURN  [[noreturn]]
   #define ETL_MOVE(x)   etl::move(x)
+  #define ETL_ENUM_CLASS(name)            enum class name
+  #define ETL_ENUM_CLASS_TYPE(name, type) enum class name : type
 
   #if ETL_USING_EXCEPTIONS
     #define ETL_NOEXCEPT noexcept
@@ -247,6 +250,8 @@ SOFTWARE.
   #define ETL_NOEXCEPT
   #define ETL_NOEXCEPT_EXPR(expression)
   #define ETL_MOVE(x) x
+  #define ETL_ENUM_CLASS(name)            enum name
+  #define ETL_ENUM_CLASS_TYPE(name, type) enum name
 #endif
 
 //*************************************
@@ -375,6 +380,18 @@ SOFTWARE.
   #endif
 #else
   #define ETL_HAS_INITIALIZER_LIST 0
+#endif
+
+//*************************************
+// Enable all limit macros
+#if !defined(__STDC_LIMIT_MACROS)
+  #define __STDC_LIMIT_MACROS
+#endif
+
+//*************************************
+// Enable all constant macros
+#if !defined(__STDC_CONSTANT_MACROS)
+  #define __STDC_CONSTANT_MACROS
 #endif
 
 //*************************************
