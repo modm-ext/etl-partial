@@ -7,7 +7,7 @@ Embedded Template Library.
 https://github.com/ETLCPP/etl
 https://www.etlcpp.com
 
-Copyright(c) 2018 John Wellbelove
+Copyright(c) 2022 John Wellbelove
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files(the "Software"), to deal
@@ -33,12 +33,13 @@ SOFTWARE.
  * This file is intended to evaluated multiple times by design.
  */
 
-#if !defined(ETL_COMPILER_GREEN_HILLS) && !defined(ETL_COMPILER_IAR)
-  #if !defined(ETL_COMPILER_ARM5)
-    #pragma push_macro("min")
-    #pragma push_macro("max")
-  #endif
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__llvm__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 
-  #undef min
-  #undef max
+#if defined(__clang__) || defined(__llvm__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wuninitialized"
 #endif

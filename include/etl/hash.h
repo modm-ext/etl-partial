@@ -363,6 +363,10 @@ namespace etl
           float  v;
         } u;
 
+        if (v == -0.0f)
+        { // -0.0 and 0.0 are represented differently at bit level
+          v = 0.0f;
+        }
         u.v = v;
 
         return u.s;
@@ -393,6 +397,10 @@ namespace etl
           double v;
         } u;
 
+        if (v == -0.0)
+        { // -0.0 and 0.0 are represented differently at bit level
+          v = 0.0;
+        }
         u.v = v;
 
         return u.s;
@@ -423,6 +431,10 @@ namespace etl
           long double v;
         } u;
 
+        if (v == -0.0L)
+        { // -0.0 and 0.0 are represented differently at bit level
+          v = 0.0L;
+        }
         u.v = v;
 
         return u.s;

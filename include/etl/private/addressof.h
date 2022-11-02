@@ -7,7 +7,7 @@ Embedded Template Library.
 https://github.com/ETLCPP/etl
 https://www.etlcpp.com
 
-Copyright(c) 2018 John Wellbelove
+Copyright(c) 2022 John Wellbelove
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files(the "Software"), to deal
@@ -28,17 +28,34 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-/*
- * The header include guard has been intentionally omitted.
- * This file is intended to evaluated multiple times by design.
- */
+#ifndef ETL_ADDRESSOF_INCLUDED
+#define ETL_ADDRESSOF_INCLUDED
 
-#if !defined(ETL_COMPILER_GREEN_HILLS) && !defined(ETL_COMPILER_IAR)
-  #if !defined(ETL_COMPILER_ARM5)
-    #pragma push_macro("min")
-    #pragma push_macro("max")
-  #endif
+#include "../platform.h"
 
-  #undef min
-  #undef max
+#if defined(ETL_IN_UNIT_TEST) || ETL_USING_STL
+  #include <memory>
+#endif
+
+///\defgroup memory memory
+///\ingroup etl
+
+namespace etl
+{
+  //*****************************************************************************
+  /// Gets the address of an object.
+  /// https://en.cppreference.com/w/cpp/memory/addressof
+  ///\ingroup memory
+  //*****************************************************************************
+  template <typename T>
+  ETL_CONSTEXPR17 T* addressof(T& t)
+  {
+#if ETL_USING_STL && ETL_USING_CPP11
+    return std::addressof(t);
+#else
+    return reinterpret_cast<T*>(&const_cast<char&>(reinterpret_cast<const volatile char&>(t)));
+#endif
+  }
+}
+
 #endif
