@@ -246,13 +246,14 @@ SOFTWARE.
   #define ETL_MOVE(x)                     etl::move(x)
   #define ETL_ENUM_CLASS(name)            enum class name
   #define ETL_ENUM_CLASS_TYPE(name, type) enum class name : type
+  #define ETL_LVALUE_REF_QUALIFIER        &
 
   #if ETL_USING_EXCEPTIONS
-    #define ETL_NOEXCEPT                  noexcept
-    #define ETL_NOEXCEPT_EXPR(expression) noexcept(expression)
+    #define ETL_NOEXCEPT           noexcept
+    #define ETL_NOEXCEPT_EXPR(...) noexcept(__VA_ARGS__)
   #else
     #define ETL_NOEXCEPT
-    #define ETL_NOEXCEPT_EXPR(expression)
+    #define ETL_NOEXCEPT_EXPR(...)
   #endif
 #else
   #define ETL_CONSTEXPR
@@ -264,10 +265,11 @@ SOFTWARE.
   #define ETL_FINAL
   #define ETL_NORETURN
   #define ETL_NOEXCEPT
-  #define ETL_NOEXCEPT_EXPR(expression)
+  #define ETL_NOEXCEPT_EXPR(...)
   #define ETL_MOVE(x) x
   #define ETL_ENUM_CLASS(name)            enum name
   #define ETL_ENUM_CLASS_TYPE(name, type) enum name
+  #define ETL_LVALUE_REF_QUALIFIER
 #endif
 
 //*************************************
@@ -303,12 +305,13 @@ SOFTWARE.
 //*************************************
 // C++20
 #if ETL_USING_CPP20 && !defined(ETL_FORCE_NO_ADVANCED_CPP)
-  #define ETL_LIKELY            [[likely]]
-  #define ETL_UNLIKELY          [[unlikely]]
-  #define ETL_CONSTEXPR20       constexpr
-  #define ETL_CONSTEVAL         consteval
-  #define ETL_CONSTINIT         constinit
-  #define ETL_NO_UNIQUE_ADDRESS [[no_unique_address]]
+  #define ETL_LIKELY             [[likely]]
+  #define ETL_UNLIKELY           [[unlikely]]
+  #define ETL_CONSTEXPR20        constexpr
+  #define ETL_CONSTEVAL          consteval
+  #define ETL_CONSTINIT          constinit
+  #define ETL_NO_UNIQUE_ADDRESS  [[no_unique_address]]
+  #define ETL_EXPLICIT_EXPR(...) explicit(__VA_ARGS__)
 #else
   #define ETL_LIKELY
   #define ETL_UNLIKELY
@@ -316,6 +319,7 @@ SOFTWARE.
   #define ETL_CONSTEVAL
   #define ETL_CONSTINIT
   #define ETL_NO_UNIQUE_ADDRESS
+  #define ETL_EXPLICIT_EXPR(...) explicit
 #endif
 
 #if ETL_USING_CPP20 && ETL_USING_STL
