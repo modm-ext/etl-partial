@@ -312,25 +312,41 @@ namespace etl
     }
 #endif
 
+#if ETL_USING_CPP11
     //*******************************************
     /// Copy construct from unexpected type.
     //*******************************************
-    template <typename G>
-    ETL_CONSTEXPR14
-    ETL_EXPLICIT_EXPR(!etl::is_convertible_v<const G&, TError>)
-    expected(const etl::unexpected<G>& ue)
+    template <typename G, typename etl::enable_if<!etl::is_convertible<const G&, TError>::value, bool>::type = false>
+    ETL_CONSTEXPR14 explicit expected(const etl::unexpected<G>& ue)
       : storage(etl::in_place_index_t<Error_Type>(), ue.error())
     {
     }
+
+    template <typename G, typename etl::enable_if<etl::is_convertible<const G&, TError>::value, bool>::type = false>
+    ETL_CONSTEXPR14 expected(const etl::unexpected<G>& ue)
+      : storage(etl::in_place_index_t<Error_Type>(), ue.error())
+    {
+    }
+#else
+    template <typename G>
+    explicit expected(const etl::unexpected<G>& ue)
+      : storage(etl::in_place_index_t<Error_Type>(), ue.error())
+    {
+    }
+#endif
 
 #if ETL_USING_CPP11
     //*******************************************
     /// Move construct from unexpected type.
     //*******************************************
-    template <typename G>
-    ETL_CONSTEXPR14
-    ETL_EXPLICIT_EXPR(!etl::is_convertible_v<G, TError>)
-    expected(etl::unexpected<G>&& ue)
+    template <typename G, typename etl::enable_if<!etl::is_convertible<const G&, TError>::value, bool>::type = false>
+    ETL_CONSTEXPR14 explicit expected(etl::unexpected<G>&& ue)
+      : storage(etl::in_place_index_t<Error_Type>(), etl::move(ue.error()))
+    {
+    }
+
+    template <typename G, typename etl::enable_if<etl::is_convertible<const G&, TError>::value, bool>::type = false>
+    ETL_CONSTEXPR14 expected(etl::unexpected<G>&& ue)
       : storage(etl::in_place_index_t<Error_Type>(), etl::move(ue.error()))
     {
     }
@@ -526,7 +542,8 @@ namespace etl
     template <typename U>
     ETL_NODISCARD
     ETL_CONSTEXPR14
-    value_type value_or(U&& default_value) const&
+    etl::enable_if_t<etl::is_convertible<U, value_type>::value, value_type>
+      value_or(U&& default_value) const&
     {
       if (has_value())
       {
@@ -534,7 +551,7 @@ namespace etl
       }
       else
       {
-        return default_value;
+        return static_cast<value_type>(etl::forward<U>(default_value));
       }
     }
 
@@ -544,7 +561,8 @@ namespace etl
     template <typename U>
     ETL_NODISCARD
     ETL_CONSTEXPR14
-    value_type value_or(U&& default_value)&&
+    etl::enable_if_t<etl::is_convertible<U, value_type>::value, value_type>
+      value_or(U&& default_value)&&
     {
       if (has_value())
       {
@@ -552,7 +570,7 @@ namespace etl
       }
       else
       {
-        return etl::move(default_value);
+        return static_cast<value_type>(etl::forward<U>(default_value));
       }
     }
 
