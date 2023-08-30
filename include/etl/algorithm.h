@@ -229,8 +229,8 @@ namespace etl
   {
     return std::move(sb, se, db);
   }
-#else
-  // non-pointer or not trivially copyable
+#elif ETL_USING_CPP11
+  // For C++11
   template <typename TIterator1, typename TIterator2>
   ETL_CONSTEXPR14 TIterator2 move(TIterator1 sb, TIterator1 se, TIterator2 db)
   {
@@ -243,19 +243,25 @@ namespace etl
 
     return db;
   }
+#else
+  // For C++03
+  template <typename TIterator1, typename TIterator2>
+  ETL_CONSTEXPR14 TIterator2 move(TIterator1 sb, TIterator1 se, TIterator2 db)
+  {
+    return copy(sb, se, db);
+  }
 #endif
 
   //***************************************************************************
   // move_backward
 #if ETL_USING_STL && ETL_USING_CPP20
   template <typename TIterator1, typename TIterator2>
-  ETL_CONSTEXPR20
-    TIterator2 move_backward(TIterator1 sb, TIterator1 se, TIterator2 de)
+  ETL_CONSTEXPR20 TIterator2 move_backward(TIterator1 sb, TIterator1 se, TIterator2 de)
   {
     return std::move_backward(sb, se, de);
   }
-#else
-  // non-pointer or not trivially copyable
+#elif ETL_USING_CPP11
+  // For C++11
   template <typename TIterator1, typename TIterator2>
   ETL_CONSTEXPR14 TIterator2 move_backward(TIterator1 sb, TIterator1 se, TIterator2 de)
   {
@@ -265,6 +271,13 @@ namespace etl
     }
 
     return de;
+  }
+#else
+  // For C++03
+  template <typename TIterator1, typename TIterator2>
+  ETL_CONSTEXPR14 TIterator2 move_backward(TIterator1 sb, TIterator1 se, TIterator2 de)
+  {
+    return etl::copy_backward(sb, se, de);
   }
 #endif
 
