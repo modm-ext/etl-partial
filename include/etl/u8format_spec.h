@@ -7,7 +7,7 @@ Embedded Template Library.
 https://github.com/ETLCPP/etl
 https://www.etlcpp.com
 
-Copyright(c) 2022 John Wellbelove
+Copyright(c) 2023 John Wellbelove
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files(the "Software"), to deal
@@ -28,16 +28,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-/*
- * The header include guard has been intentionally omitted.
- * This file is intended to evaluated multiple times by design.
- */
+#ifndef ETL_U8FORMAT_SPEC_INCLUDED
+#define ETL_U8FORMAT_SPEC_INCLUDED
 
-#if defined(__GNUC__) && !defined(__clang__) && !defined(__llvm__)
-  #pragma GCC diagnostic push
-#endif
+///\ingroup string
 
-#if defined(__clang__) || defined(__llvm__)
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wself-assign-overloaded"
+#include "platform.h"
+#include "basic_format_spec.h"
+#include "u8string.h"
+
+namespace etl
+{
+  typedef etl::basic_format_spec<etl::iu8string> u8format_spec;
+}
+
 #endif
