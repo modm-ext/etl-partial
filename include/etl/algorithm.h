@@ -2143,16 +2143,30 @@ namespace etl
   //***************************************************************************
   template<typename T, typename TCompare>
   ETL_CONSTEXPR
-  const T& clamp(const T& value, const T& low, const T& high, TCompare compare)
+  T clamp(const T& value, const T& low, const T& high, TCompare compare)
   {
     return compare(value, low) ? low : compare(high, value) ? high : value;
   }
 
   template <typename T>
   ETL_CONSTEXPR
-  const T& clamp(const T& value, const T& low, const T& high )
+  T clamp(const T& value, const T& low, const T& high)
   {
     return clamp(value, low, high, etl::less<T>());
+  }
+
+  template<typename T, T Low, T High, typename TCompare>
+  ETL_CONSTEXPR
+  T clamp(const T& value, TCompare compare)
+  {
+    return compare(value, Low) ? Low : compare(High, value) ? High : value;
+  }
+
+  template <typename T, T Low, T High>
+  ETL_CONSTEXPR
+  T clamp(const T& value)
+  {
+    return clamp<T, Low, High>(value, etl::less<T>());
   }
 
   //***************************************************************************
