@@ -7,7 +7,7 @@ Embedded Template Library.
 https://github.com/ETLCPP/etl
 https://www.etlcpp.com
 
-Copyright(c) 2014 John Wellbelove
+Copyright(c) 2023 John Wellbelove
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files(the "Software"), to deal
@@ -28,40 +28,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef ETL_NULLPTR_INCLUDED
-#define ETL_NULLPTR_INCLUDED
+/*
+ * The header include guard has been intentionally omitted.
+ * This file is intended to evaluated multiple times by design.
+ */
 
-#include "platform.h"
-
-#include <stddef.h>
-
-namespace etl
-{
-#if ETL_CPP11_NOT_SUPPORTED
-  class nullptr_t
-  {
-  public:
-    template <class T>
-    inline operator T*() const { return 0; }
-
-    template <class C, class T>
-    inline operator T C::* () const { return 0; }
-
-    inline bool operator==(nullptr_t) const { return true; }
-    inline bool operator!=(nullptr_t) const { return false; }
-  private:
-    void operator&() const ETL_DELETE; // cannot take the address of ETL_NULLPTR
-  };
-
-  static const nullptr_t _nullptr = nullptr_t();
-
-  #define ETL_NULLPTR (etl::_nullptr)
-#else
-  // Use the new style nullptr.
-  typedef decltype(nullptr) nullptr_t;
-  #define ETL_NULLPTR nullptr
-#endif
-}
-
+#if defined(__GNUC__) && (__GNUC__ >= 10) && !defined(__clang__) && !defined(__llvm__)
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wc++20-compat"
 #endif
 
+#if defined(__clang__) || defined(__llvm__)
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wc++20-compat"
+#endif
