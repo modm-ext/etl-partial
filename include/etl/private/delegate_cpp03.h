@@ -69,7 +69,7 @@ namespace etl
     {
       etl::optional<TReturn> call_if(TParam param)
       {
-				TDelegate& d = static_cast<TDelegate&>(*this);
+        TDelegate& d = static_cast<TDelegate&>(*this);
 
         etl::optional<TReturn> result;
 
@@ -88,7 +88,7 @@ namespace etl
     {
       bool call_if()
       {
-				TDelegate& d = static_cast<TDelegate&>(*this);
+        TDelegate& d = static_cast<TDelegate&>(*this);
 
         if (d.is_valid())
         {
