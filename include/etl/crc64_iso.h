@@ -7,7 +7,7 @@ Embedded Template Library.
 https://github.com/ETLCPP/etl
 https://www.etlcpp.com
 
-Copyright(c) 2021 John Wellbelove
+Copyright(c) 2025 John Wellbelove
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files(the "Software"), to deal
@@ -28,30 +28,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef ETL_CRC16_AUG_CCITT_INCLUDED
-#define ETL_CRC16_AUG_CCITT_INCLUDED
+#ifndef ETL_CRC64_ISO_INCLUDED
+#define ETL_CRC64_ISO_INCLUDED
 
 #include "platform.h"
 #include "private/crc_implementation.h"
 
-///\defgroup crc16_aug_ccitt 16 bit CRC calculation
+///\defgroup crc64_iso 64 bit iso CRC calculation
 ///\ingroup crc
 
 namespace etl
 {
-#if ETL_USING_CPP11 && !defined(ETL_CRC_FORCE_CPP03_IMPLEMENTATION)
+#if ETL_USING_CPP11
   template <size_t Table_Size>
-  using crc16_aug_ccitt_t = etl::crc_type<etl::private_crc::crc16_aug_ccitt_parameters, Table_Size>;
+  using crc64_iso_t = etl::crc_type<etl::private_crc::crc64_iso_parameters, Table_Size>;
 #else
   template <size_t Table_Size>
-  class crc16_aug_ccitt_t : public etl::crc_type<etl::private_crc::crc16_aug_ccitt_parameters, Table_Size>
+  class crc64_iso_t : public etl::crc_type<etl::private_crc::crc64_iso_parameters, Table_Size>
   {
   public:
 
     //*************************************************************************
     /// Default constructor.
     //*************************************************************************
-    crc16_aug_ccitt_t()
+    crc64_iso_t()
     {
       this->reset();
     }
@@ -62,7 +62,7 @@ namespace etl
     /// \param end   End of the range.
     //*************************************************************************
     template<typename TIterator>
-    crc16_aug_ccitt_t(TIterator begin, const TIterator end)
+    crc64_iso_t(TIterator begin, const TIterator end)
     {
       this->reset();
       this->add(begin, end);
@@ -70,9 +70,9 @@ namespace etl
   };
 #endif
 
-  typedef etl::crc16_aug_ccitt_t<256U> crc16_aug_ccitt_t256;
-  typedef etl::crc16_aug_ccitt_t<16U>  crc16_aug_ccitt_t16;
-  typedef etl::crc16_aug_ccitt_t<4U>   crc16_aug_ccitt_t4;
-  typedef crc16_aug_ccitt_t256         crc16_aug_ccitt;
+  typedef etl::crc64_iso_t<256U> crc64_iso_t256;
+  typedef etl::crc64_iso_t<16U>  crc64_iso_t16;
+  typedef etl::crc64_iso_t<4U>   crc64_iso_t4;
+  typedef crc64_iso_t256         crc64_iso;
 }
 #endif
